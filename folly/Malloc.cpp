@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include <folly/Malloc.h>
 #ifdef FOLLY_USE_JEMALLOC
 #include "jemalloc/jemalloc.h"
 #endif
+#include <folly/Malloc.h>
 
 #include <cstdint>
 
@@ -34,18 +34,18 @@ bool usingJEMallocSlow() {
   // (!!). http://goo.gl/xpmctm
 
 #ifdef FOLLY_USE_JEMALLOC
-    mallocx = je_mallocx;
-    rallocx = je_rallocx;
-    xallocx = je_xallocx;
-    sallocx = je_sallocx;
-    dallocx = je_dallocx;
-    nallocx = je_nallocx;
-    mallctl = je_mallctl;
-#endif
+  mallocx = je_mallocx;
+  rallocx = je_rallocx;
+  xallocx = je_xallocx;
+  sallocx = je_sallocx;
+  dallocx = je_dallocx;
+  nallocx = je_nallocx;
+  mallctl = je_mallctl;
+
   if (mallocx == nullptr || rallocx == nullptr || xallocx == nullptr
       || sallocx == nullptr || dallocx == nullptr || nallocx == nullptr
       || mallctl == nullptr) {
-    return false;
+      goto failed;
   }
 
   // "volatile" because gcc optimizes out the reads from *counter, because
@@ -55,23 +55,42 @@ bool usingJEMallocSlow() {
 
   if (mallctl("thread.allocatedp", static_cast<void*>(&counter), &counterLen,
               nullptr, 0) != 0) {
-    return false;
+    goto failed;
   }
 
   if (counterLen != sizeof(uint64_t*)) {
-    return false;
+    goto failed;
   }
 
   uint64_t origAllocated = *counter;
 
-  void* ptr = malloc(1);
+  void* ptr = je_malloc(1);
   if (!ptr) {
     // wtf, failing to allocate 1 byte
-    return false;
+    goto failed;
   }
-  free(ptr);
+  je_free(ptr);
 
-  return (origAllocated != *counter);
+  if (origAllocated == *counter)
+    goto failed;
+
+  folly_malloc = je_malloc;
+  folly_calloc = je_calloc;
+  folly_realloc = je_realloc;
+  folly_aligned_alloc = je_aligned_alloc;
+  folly_free = je_free;
+  folly_aligned_free = je_free;
+  return true;
+
+failed:
+#endif
+  folly_malloc = malloc;
+  folly_calloc = calloc;
+  folly_realloc = realloc;
+  folly_aligned_alloc = _aligned_malloc;
+  folly_free = free;
+  folly_aligned_free = _aligned_free;
+  return false;
 }
 
 }  // namespaces

@@ -677,6 +677,7 @@ static bool
 malloc_init_hard(void)
 {
 	arena_t *init_arenas[1];
+    je_init();
 
 	malloc_mutex_lock(&init_lock);
 	if (malloc_initialized || IS_INITIALIZER) {

@@ -42,6 +42,13 @@ extern size_t (*nallocx)(size_t, int);
 extern int (*mallctl)(const char*, void*, size_t*, void*, size_t);
 #endif
 
+extern void*(*folly_malloc)(size_t);
+extern void*(*folly_calloc)(size_t, size_t);
+extern void*(*folly_realloc)(void*, size_t);
+extern void*(*folly_aligned_alloc)(size_t, size_t);
+extern void (*folly_free)(void*);
+extern void (*folly_aligned_free)(void*);
+
 }
 
 #endif

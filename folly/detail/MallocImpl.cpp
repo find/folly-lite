@@ -28,4 +28,11 @@ size_t (*nallocx)(size_t, int) = nullptr;
 int (*mallctl)(const char*, void*, size_t*, void*, size_t) = nullptr;
 #endif
 
+void*(*folly_malloc)(size_t) = nullptr;
+void*(*folly_calloc)(size_t, size_t) = nullptr;
+void*(*folly_realloc)(void*, size_t) = nullptr;
+void*(*folly_aligned_alloc)(size_t, size_t) = nullptr;
+void(*folly_free)(void*) = nullptr;
+void(*folly_aligned_free)(void*) = nullptr;
+
 }

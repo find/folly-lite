@@ -121,7 +121,7 @@ private:
     // note that 'allocate' and 'deallocate' are inherited from Allocator
     T* D_allocate(size_type n) {
       if (usingStdAllocator::value) {
-        return static_cast<T*>(malloc(n * sizeof(T)));
+        return static_cast<T*>(folly_malloc(n * sizeof(T)));
       } else {
         return std::allocator_traits<Allocator>::allocate(*this, n);
       }
@@ -129,7 +129,7 @@ private:
 
     void D_deallocate(T* p, size_type n) noexcept {
       if (usingStdAllocator::value) {
-        free(p);
+        folly_free(p);
       } else {
         std::allocator_traits<Allocator>::deallocate(*this, p, n);
       }

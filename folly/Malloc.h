@@ -161,19 +161,19 @@ static const size_t jemallocMinInPlaceExpandable = 4096;
  * failure and throw std::bad_alloc in that case.
  */
 inline void* checkedMalloc(size_t size) {
-  void* p = malloc(size);
+  void* p = folly_malloc(size);
   if (!p) std::__throw_bad_alloc();
   return p;
 }
 
 inline void* checkedCalloc(size_t n, size_t size) {
-  void* p = calloc(n, size);
+  void* p = folly_calloc(n, size);
   if (!p) std::__throw_bad_alloc();
   return p;
 }
 
 inline void* checkedRealloc(void* ptr, size_t size) {
-  void* p = realloc(ptr, size);
+  void* p = folly_realloc(ptr, size);
   if (!p) std::__throw_bad_alloc();
   return p;
 }
@@ -215,7 +215,7 @@ inline void* smartRealloc(void* p,
     // Cannot expand; must move
     auto const result = checkedMalloc(newCapacity);
     std::memcpy(result, p, currentSize);
-    free(p);
+    folly_free(p);
     return result;
   }
 
@@ -225,7 +225,7 @@ inline void* smartRealloc(void* p,
     // Too much slack, malloc-copy-free cycle:
     auto const result = checkedMalloc(newCapacity);
     std::memcpy(result, p, currentSize);
-    free(p);
+    folly_free(p);
     return result;
   }
   // If there's not too much slack, we realloc in hope of coalescing

@@ -436,7 +436,7 @@ public:
       return;
     }
     if (c == Category::isMedium) {
-      free(ml_.data_);
+      folly_free(ml_.data_);
       return;
     }
     RefCounted::decrementRefs(ml_.data_);
@@ -464,7 +464,7 @@ public:
                       | static_cast<category_type>(Category::isMedium);
     } else {
       // No need for the memory
-      free(data);
+      folly_free(data);
       setSmallSize(0);
     }
   }
@@ -764,7 +764,7 @@ private:
       size_t oldcnt = dis->refCount_.fetch_sub(1, std::memory_order_acq_rel);
       assert(oldcnt > 0);
       if (oldcnt == 1) {
-        free(dis);
+        folly_free(dis);
       }
     }
 
